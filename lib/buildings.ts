@@ -1,0 +1,91 @@
+export const buildingStages = [
+  {
+    name: "One building", buildings: 1, label: "Riverside Tower", hit: 0,
+    change: "One facilities team looks after Riverside Tower. Keep the building map, case notes, and maintenance history in one shared service so the next shift can pick up where the last one stopped.",
+    route: "Riverside gateway → building data service", workers: "One assistant service for the facilities team",
+    stores: "One memory database + a sensor-history store", updates: "Save the case → update searchable maintenance notes",
+    bottleneck: "A burst of sensor messages can delay a comfort complaint. Give sensor ingestion and assistant requests separate queues, even while they share a small deployment.",
+    technical: "A local gateway forwards timestamped readings to a time-series store. PostgreSQL holds asset facts, case checkpoints, and events; a small search index finds relevant maintenance notes. A checkpoint is a saved place in an unfinished case.",
+  },
+  {
+    name: "Campus", buildings: 50, label: "A university estate", hit: 80,
+    change: "One central team serves 50 buildings. Each building has its own gateway and identity. Share the approved playbooks, but keep each room’s facts and maintenance history tied to the correct building.",
+    route: "50 building gateways → shared campus platform", workers: "A pool of assistant workers with per-building limits",
+    stores: "Shared memory database + fast asset cache + separate search", updates: "Save the case → queue → background search updater",
+    bottleneck: "Monday morning brings complaints from many buildings at once. Add assistant workers as demand grows and cap each building’s share so one building’s assistant traffic cannot crowd out the estate. Sensor ingestion has a separate queue and limits.",
+    technical: "Partition reads by organization and building. Cache versioned asset records, pool database connections, and scale search separately from case writes. Commit an event and its outbox record in the same database transaction. A consumer updates search afterward and deduplicates repeated event IDs; updates may lag.",
+  },
+  {
+    name: "Global portfolio", buildings: 1000, label: "Offices across regions", hit: 90,
+    change: "Regional facilities teams manage 1,000 buildings. Send each building to its assigned region, keep local history there, and share approved playbook versions. Cross-portfolio learning uses reviewed, access-controlled summaries.",
+    route: "Building directory → assigned regional platform", workers: "Independent assistant worker pools in each region",
+    stores: "Regional memory databases grouped by building + regional search", updates: "Regional case save → regional queue → search and audit history",
+    bottleneck: "A region or WAN connection can fail. Keep existing building-control routines local, show when cloud data was last updated, and test regional recovery before moving traffic to an allowed replica.",
+    technical: "Shard memory by organization and building, with one home region owning writes. A shard is a smaller database partition. Fence the old writer before promoting a replica; restoration time and potential data loss depend on the replication design. Local gateways need explicit storage limits and reconnect handling.",
+  },
+];
+
+export const memoryHomes = [
+  { name: "Working memory", meaning: "The technician’s scratchpad", home: "Active case state, saved at important steps", rule: "Organization / building / case / run. Save progress so another worker can resume; reject conflicting updates." },
+  { name: "Short-term memory", meaning: "This case’s conversation", home: "Recent messages and a saved case summary", rule: "Organization / building / case. Keep conversations separate; summarize older messages before sending context to the model." },
+  { name: "Semantic memory", meaning: "The building’s reference book", home: "Asset register and room-to-equipment map; cached copies for speed", rule: "Organization / building / asset. Use stable IDs, source versions, and refresh dates. Room 401 in another building is a different room." },
+  { name: "Episodic memory", meaning: "The maintenance logbook", home: "Dated work-order outcomes and a searchable copy", rule: "Organization / building / asset / event. Deduplicate event IDs and retrieve only relevant, permitted history." },
+  { name: "Procedural memory", meaning: "The approved playbook", home: "Versioned playbooks with building-specific overrides", rule: "Organization / building / procedure / version. Pin the approved version for the case; equipment limits stay in the control system." },
+];
+
+export const buildingScenarios = [
+  {
+    id: "comfort", name: "Too hot again", category: "Occupant comfort", asset: "Room 401 · Air handler AHU-3", caseId: "C-401",
+    prompt: "Room 401 is hot again. Didn’t we fix this last week?",
+    live: "At 10:05 a.m., Room 401 reports 81°F. Its target is 73°F. The reading is 20 seconds old.",
+    without: "The room is warm. Check its temperature and cooling equipment.",
+    with: "Room 401 is served by AHU-3. Last week’s work order found a sticking damper. Check today’s airflow and damper feedback before asking a technician to revisit that fault.",
+    records: [
+      "Investigating C-401: compare temperature, airflow, and damper feedback; waiting for a fresh equipment reading.",
+      "Occupant: ‘It gets hot after 10 a.m.’ Operator: ‘Please leave the room schedule unchanged while we investigate.’",
+      "Room 401 is served by AHU-3. Its approved occupied target is 73°F. These are asset facts, not a live temperature reading.",
+      "Last Tuesday: a technician freed a sticking damper on AHU-3; Room 401 cooled afterward. This is a clue, not proof of today’s cause.",
+      "Comfort complaint v3: verify fresh readings, check schedule and airflow, review prior work, then route a proposed intervention to the operator.",
+    ],
+    current: "Request current temperature, airflow, damper feedback, and operating mode from the building management system (BMS). Check timestamps and quality flags.",
+    recall: "Find last Tuesday’s AHU-3 work order and its recorded outcome. Match Riverside Tower and AHU-3, not just the words ‘Room 401’.",
+    outcome: "Recommend a damper inspection and link the prior work order. The operator reviews the recommendation; a technician confirms the cause. Record the actual result after the visit.",
+    offline: "The earlier damper issue is still a useful lead, but today’s cause is unconfirmed. Request an on-site check; do not propose a setting change from an old temperature value.",
+  },
+  {
+    id: "energy", name: "Lights left on", category: "Energy operations", asset: "Floor 6 · Lighting group L6", caseId: "E-606",
+    prompt: "Why are the sixth-floor lights still on after everyone has left?",
+    live: "At 10:10 p.m., lighting group L6 reports ON. The latest occupancy sample reports no presence; that alone does not confirm the floor is empty.",
+    without: "Check occupancy and the lighting schedule.",
+    with: "Floor 6 normally closes at 8 p.m. A late-cleaning override was left active last Friday. Check today’s booking, cleaning schedule, and override expiry before suggesting a schedule correction.",
+    records: [
+      "Investigating E-606: compare lighting status, bookings, and the current override; no command has been issued.",
+      "Operator: ‘Check normal office lighting only.’ Follow-up: ‘The cleaning team may still be on site.’",
+      "Lighting group L6 serves Floor 6 offices. Normal closing time is 8 p.m. local time; emergency lighting is outside this workflow.",
+      "Last Friday: an approved cleaning override had no end time. A technician corrected its expiry and confirmed normal scheduling resumed.",
+      "After-hours lighting v2: verify occupancy and bookings, inspect overrides, obtain operator approval for a correction, then confirm the result.",
+    ],
+    current: "Read current lighting status, override expiry, occupancy timestamps, and today’s booking and cleaning schedules. Use the building’s local time zone.",
+    recall: "Retrieve the previous L6 override incident. Use it to choose what to check, not to assume that today’s situation has the same cause.",
+    outcome: "Ask the operator to review any expired override after confirming the floor’s use. If a correction is approved and applied through the BMS, verify the resulting status and save the outcome.",
+    offline: "The assistant cannot confirm who is on the floor or whether an override is still needed. Leave the existing local schedule in control and ask the operator to verify on site.",
+  },
+  {
+    id: "maintenance", name: "A fault returns", category: "Maintenance handover", asset: "Air handler AHU-3 · Filter alarm", caseId: "M-303",
+    prompt: "AHU-3 has raised the filter alarm again. What should the next shift know?",
+    live: "At 8:15 a.m., AHU-3 reports a filter-related alarm. Alarm state and pressure readings are observations; they do not establish a diagnosis.",
+    without: "Inspect the air handler and review its maintenance records.",
+    with: "AHU-3 had a filter replacement last month, but the follow-up visit found a pressure-sensor issue. Give the next shift both work orders and ask them to verify the current readings before ordering another filter.",
+    records: [
+      "Preparing handover M-303: collect current alarm details, recent work orders, and the open technician assignment.",
+      "Day shift: ‘A technician is already assigned.’ Supervisor: ‘Add findings to the open job instead of creating a duplicate.’",
+      "AHU-3 serves Floors 4–6. Its asset record links to the approved service manual and site maintenance team.",
+      "Last month: filter replaced. Follow-up visit: pressure-sensor issue found. Both events retain technician notes and timestamps.",
+      "Alarm handover v4: verify alarm and data quality, attach service history, check for an open job, and route diagnosis to the assigned technician.",
+    ],
+    current: "Read the current alarm, associated sensor values, data-quality flags, and work-order status. Check whether the alarm has already cleared.",
+    recall: "Find the filter replacement and the later sensor investigation in AHU-3’s work history. Preserve their order and distinguish observations from confirmed findings.",
+    outcome: "Append a handover to the existing maintenance job with both prior visits and the current alarm snapshot. Use a unique event ID to prevent duplicate notes; the technician records the eventual diagnosis.",
+    offline: "Prepare a handover explicitly marked ‘current equipment status unverified.’ Keep the existing assignment and request local verification before treating the old alarm as active.",
+  },
+];

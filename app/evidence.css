@@ -1,0 +1,24 @@
+/* Sources: the single reference list, and the one link each section shows to it. */
+.storage-warning{padding:14px 18px;border:1px solid #8d724c;border-radius:10px;background:#29231a;color:#e2bf8b;margin:18px 0;font-size:var(--fs-base);line-height:1.7}
+
+.section-sources{display:inline-flex;align-items:center;gap:7px;margin:14px 0 0;padding:7px 12px;border:1px solid #3d5244;border-radius:999px;color:#bcebc6;font-size:var(--fs-sm);text-decoration:none;transition:border-color .2s,background .2s}
+.section-sources:hover{border-color:#8ebf9b;background:#1b2a22}
+
+.sources-view{margin-bottom:35px}
+.source-filter{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 26px}
+.source-filter button,.source-uses button{display:inline-flex;align-items:center;gap:6px;border:1px solid #3d5244;border-radius:999px;background:transparent;color:#c3d6c9;font-size:var(--fs-sm);padding:6px 12px;cursor:pointer;transition:background .2s,border-color .2s}
+.source-filter button small{color:#8fa899;font-size:var(--fs-xs)}
+.source-filter button[aria-pressed=true]{background:#bddfc4;border-color:#bddfc4;color:#172c23}
+.source-filter button[aria-pressed=true] small{color:#2c4a37}
+.source-group h3{margin:0 0 12px;font-size:var(--fs-md);font-weight:600;color:#dfeae3}
+.source-group+.source-group{margin-top:28px}
+.reference-list{list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:0;padding:0}
+.reference-list li{display:flex;flex-direction:column;gap:8px;padding:16px 18px;border:1px solid #303b34;border-radius:10px;background:#151b17;animation:rise-in .35s ease-out both}
+.reference-list a{display:inline-flex;align-items:flex-start;gap:6px;color:#bcebc6;font-size:var(--fs-base);font-weight:500;text-decoration:underline;text-underline-offset:3px}
+.reference-list a svg{flex:none;margin-top:3px}
+.reference-list p{margin:0;color:#a9bbb0;font-size:var(--fs-sm);line-height:1.7}
+.source-uses{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto}
+.source-uses button{padding:3px 9px;font-size:var(--fs-xs);color:#9fb3a6}
+.source-uses button:hover,.source-filter button:hover{border-color:#8ebf9b}
+
+@media(max-width:700px){.reference-list{grid-template-columns:1fr}}

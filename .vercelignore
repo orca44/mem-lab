@@ -1,0 +1,24 @@
+# Vercel installs and builds from source and the committed lockfile
+node_modules/
+.next/
+*.tsbuildinfo
+next-env.d.ts
+
+# Local-only files
+.git/
+.env*
+.vercel/
+*.pem
+*.log
+.DS_Store
+._*
+.vscode/
+.claude/
+AGENTS.md
+CLAUDE.md
+
+# Repository-only documentation and tests; the app itself does not need them
+README.md
+tests/
+test-results/
+playwright.config.ts

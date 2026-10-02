@@ -1,0 +1,69 @@
+/* Color roles, loaded last. Surfaces are neutral so sections separate clearly; color carries meaning:
+   mint = interactive or selected, amber = the main point, blue = real-world context, rose = wrong or leaked. */
+:root {
+  --surface: #161a18; --surface-2: #1d2220; --inset: #111413;
+  --line: #2b322e; --line-2: #3b4540;
+  --text-2: #c3cdc7;
+  --amber: #e3c294; --blue: #a6c4ef; --rose: #e9b1bd;
+  --mint-wash: rgba(188, 235, 198, .08); --amber-wash: rgba(227, 194, 148, .08); --blue-wash: rgba(166, 196, 239, .07); --rose-wash: rgba(233, 177, 189, .1);
+}
+
+/* One page section = one heading with a rule above, so the views read as clear blocks. */
+.ml-body > .ml-intro, .scale-body > .ml-intro { padding-top: 18px; border-top: 1px solid var(--line); }
+
+/* Neutral containers. */
+.ml-card, .visual-panel, .architecture-flow li, .building-memory-grid article, .building-comparison article, .reference-list li, .ml-stat, .scale-metrics > div {
+  background: var(--surface); border-color: var(--line-2);
+}
+.visual-panel { background: var(--surface); }
+.ml-controls { background: var(--inset); border-color: var(--line); }
+.ml-more { background: var(--inset); border-color: var(--line); }
+.ml-code, .ml-card blockquote, .ml-evidence { background: var(--inset); border-color: var(--line-2); }
+.ml-card blockquote { border-left: 3px solid var(--line-2); color: var(--text-2); }
+.ml-table, .ml-table th, .ml-table td { border-color: var(--line); }
+.ml-table th { background: var(--surface-2); color: var(--text-2); }
+.ml-budget, .ml-bar > div { background: var(--surface-2); }
+.memory-labs, .enterprise p, .ml-card p { color: var(--text-2); }
+.ml-stat > span, .ml-stat small { color: var(--muted); }
+.ml-stat strong, .scale-metrics strong { color: var(--text); }
+
+/* "Try this": a labeled band of numbered steps. */
+.ml-try { display: grid; gap: 10px; }
+.ml-kicker { font: 500 var(--fs-xs)/1 var(--font-mono); letter-spacing: 1.4px; text-transform: uppercase; color: var(--mint); }
+.ml-steps { margin: 0; }
+.ml-steps li { background: var(--surface); border-color: var(--line-2); }
+.ml-steps li > span { background: var(--mint); }
+.ml-steps p { color: var(--text-2); }
+
+/* Buttons and tabs: neutral until chosen; chosen is mint. */
+.memory-labs button, .ml-tabs button, .ml-choice button { background: var(--surface-2); border-color: var(--line-2); color: var(--text); }
+.memory-labs button:hover:not(:disabled), .ml-tabs button:hover, .ml-choice button:hover { border-color: #8ebf9b; }
+.memory-labs button[aria-pressed=true], .ml-tabs button[aria-pressed=true] { background: var(--mint); border-color: var(--mint); color: #13201a; }
+.ml-choice button[aria-checked=true] { background: var(--mint-wash); border-color: var(--mint); box-shadow: inset 3px 0 0 var(--mint); }
+.ml-choice button small { color: var(--muted); }
+.memory-labs .ml-presets button { background: transparent; }
+.memory-labs .ml-presets button[aria-pressed=true] { background: var(--mint); color: #13201a; }
+
+/* Meaningful accents. */
+.ml-takeaway { background: var(--amber-wash); border: 1px solid rgba(227, 194, 148, .35); border-left: 3px solid var(--amber); color: var(--text-2); }
+.ml-takeaway svg { color: var(--amber); }
+.ml-real { background: var(--blue-wash); border-left-color: var(--blue); }
+.info-callout { background: var(--blue-wash); border-left: 3px solid var(--blue); }
+.info-callout svg { color: var(--blue); }
+.ml-note { background: var(--mint-wash); border-left-color: var(--mint); color: var(--text-2); }
+.ml-cell.match { background: var(--mint-wash); border-color: #6f9e7c; color: #d5efdb; }
+.ml-cell.miss { background: var(--rose-wash); border-color: #b77f8b; color: #f3d2d9; }
+.ml-stage.on { background: var(--mint-wash); }
+.ml-stage.off { background: var(--inset); border-color: var(--line); }
+.ml-stage.leak { background: var(--rose-wash); border-color: var(--rose); color: #f6d6dd; }
+.building-comparison article:first-child { background: var(--inset); border-color: var(--line); }
+.building-comparison article:first-child h4 { color: var(--muted); }
+.building-comparison article:last-child { background: var(--mint-wash); border-color: #6f9e7c; }
+.trace-outcome { background: var(--mint-wash); border-left: 3px solid var(--mint); }
+.request-trace li { border-left-color: var(--line-2); }
+
+/* Footers sit apart from the experiment above them. */
+.ml-footer { margin-top: 10px; padding-top: 18px; border-top: 1px solid var(--line-2); }
+
+/* Form fields: dark inset, mint focus. */
+.memory-labs input:not([type=checkbox]):not([type=range]), .memory-labs select { background: var(--inset); border-color: var(--line-2); color: var(--text); }
